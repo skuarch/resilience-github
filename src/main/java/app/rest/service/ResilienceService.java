@@ -13,7 +13,9 @@ import java.util.function.Supplier;
 @Service
 public class ResilienceService {
 
-    public GitHubUser performFunctionWithCircuitBreaker(Function<String, GitHubUser> function, String userName) {
+    public <T> T performFunctionWithCircuitBreaker(Function<String, T> function, String userName, Class<T> type) {
+
+        T returnObject;
 
         CircuitBreaker circuitBreaker = CircuitBreaker
                 .ofDefaults("backendService");
@@ -21,20 +23,20 @@ public class ResilienceService {
         Retry retry = Retry
                 .ofDefaults("backendService");
 
-        Supplier<GitHubUser> supplier = () -> function.apply(userName);
-        Supplier<GitHubUser> decoratedSupplier = Decorators.ofSupplier(supplier)
+        Supplier<T> supplier = () -> function.apply(userName);
+        Supplier<T> decoratedSupplier = Decorators.ofSupplier(supplier)
                 .withRetry(retry)
                 .withCircuitBreaker(circuitBreaker)
                 .decorate();
 
-        GitHubUser result = Try
+        returnObject = Try
                 .ofSupplier(decoratedSupplier)
                 .onFailure(throwable -> {
                     throw new RuntimeException(throwable); // bad practice? <- improve this shit
                 })
                 .get();
 
-        return result;
+        return returnObject;
 
     }
 

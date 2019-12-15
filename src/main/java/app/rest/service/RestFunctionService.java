@@ -13,10 +13,12 @@ public class RestFunctionService {
     @Autowired
     private GitHubService gitHubService;
 
-    public Function<String, GitHubUser> getFunction(){
+    public <T> Function<String, T> getFunction(Class<T> type){
 
-        Function<String, GitHubUser> function = (userName) -> {
-            return gitHubService.getGitHubUser(userName);
+        Function<String, T> function = (userName) -> {
+            return type.cast(
+                    gitHubService.getGitHubUser(userName)
+            );
         };
 
         return function;

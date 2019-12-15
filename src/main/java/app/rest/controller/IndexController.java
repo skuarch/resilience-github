@@ -21,11 +21,14 @@ public class IndexController {
 
     @GetMapping
     public GitHubUser get() {
-        return resilienceService
-                .performFunctionWithCircuitBreaker(
-                        restFunctionService.getFunction(),
-                        "skuarch"
-                );
+        return GitHubUser.class.cast(
+                resilienceService
+                        .performFunctionWithCircuitBreaker(
+                                restFunctionService.getFunction(GitHubUser.class),
+                                "skuarch",
+                                GitHubUser.class
+                        )
+        );
     }
 
 }

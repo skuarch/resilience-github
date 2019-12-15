@@ -13,23 +13,17 @@ public class RestTemplateService {
     @Autowired
     private UriService uriService;
 
-    public <T> ResponseEntity<?> getRequest(String url, T type) {
+    public <T> T getRequest(String url, HttpEntity<?> entity, Class<T> type) {
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<String> entity = new HttpEntity<>(headers);
-        URI uri = uriService.getUri(url);
         RestTemplate restTemplate = new RestTemplate();
 
-        ResponseEntity<?> responseEntity = restTemplate
+        return restTemplate
                 .exchange(
-                    uri,
+                    url,
                     HttpMethod.GET,
                     entity,
-                    type.getClass()
-        );
-
-        return responseEntity;
+                    type
+        ).getBody();
 
     }
 

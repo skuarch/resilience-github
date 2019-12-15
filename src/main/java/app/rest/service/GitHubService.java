@@ -2,10 +2,13 @@ package app.rest.service;
 
 import app.rest.domain.entity.GitHubUser;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
+import java.net.URI;
+
 
 @Service
 public class GitHubService {
@@ -13,19 +16,30 @@ public class GitHubService {
     @Autowired
     private RestTemplateService restTemplateService;
 
+    @Autowired
+    private UriService uriService;
+
     public GitHubUser getGitHubUser(String userName) {
 
         GitHubUser user;
-        Optional<GitHubUser> optional = null;
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<?> entity = new HttpEntity<>(headers);
 
-        ResponseEntity<?> responseEntity = restTemplateService
-                .getRequest("https://api.githu.com/users/" + userName, new GitHubUser());
+        String url = "https://api.github.com/users/" + userName;
+        URI uri = uriService.getUri(url);
 
-        if(responseEntity == null) {
+        user = restTemplateService
+                .getRequest(
+                        uri.toString(),
+                        entity,
+                        GitHubUser.class
+                );
+
+        if(user == null) {
             user = new GitHubUser();
-        } else {
-            user = GitHubUser.class.cast(responseEntity.getBody());
         }
+
         return user;
 
     }
